@@ -26,19 +26,28 @@ def photoInfo(pickled):
     # You can print it out, but it is very long
     print "pickled item is ", len(pickled),"bytes"
     unpickled = pickle.loads(pickled)
-    print "File name was", unpickled[0], "digest is ", unpickled[1]
+    oldName = unpickled[0]
+    digest = unpickled[1]
+    print "File name was", oldName, "digest is ", digest
     photoFile,photoName = tempfile.mkstemp("photo")
     os.write(photoFile, unpickled[2])
     os.close(photoFile)
     newPhotoName = photoName + '.' + imageType(photoName)
     os.rename(photoName, newPhotoName)
-    print "photoName ", photoName
     print "Wrote it to ", newPhotoName
-    print "License:", ScanPlate.getLikelyLicense( newPhotoName )
-    print "GeoTag:", GetLatLon.getLatLon( newPhotoName )
+    licenses = ScanPlate.getLikelyLicense( newPhotoName )
+    print "License:", licenses
+    geotags = GetLatLon.getLatLon( newPhotoName )
+    print "GeoTag:", geotags
     
-#    if (redisByChecksum.get(unpickled[1] == None):
-#	redisByChecksum.append(
+    if (redisByChecksum.get(digest) == None):
+	redisByChecksum.append(digest, licenses)
+    if (redisByName.get(oldName) == None):
+	redisByName.append(oldName, licenses)
+    if (redisMD5ByLicense.get(licenses) == None):
+	redisMD5ByLicense.append(licenses, digest)
+    if (redisNamesByLicense.get(licenses) == None):
+	redisNamesByLicense.append(licenses, oldName)
     os.remove(newPhotoName)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(
