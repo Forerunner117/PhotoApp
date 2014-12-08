@@ -5,6 +5,12 @@ import GetLatLon
 import tempfile
 import PIL
 import pika
+import redis
+
+redisByChecksum = redis.Redis(host='redis-server.local', db=1)
+redisByName = redis.Redis(host='redis-server.local', db=2)
+redisMD5ByLicense = redis.Redis(host='redis-server.local', db=3)
+redisNameByLicense = redis.Redis(host='redis-server.local', db=4)
 
 def imageType(filename):
     try:
@@ -26,9 +32,13 @@ def photoInfo(pickled):
     os.close(photoFile)
     newPhotoName = photoName + '.' + imageType(photoName)
     os.rename(photoName, newPhotoName)
+    print "photoName ", photoName
     print "Wrote it to ", newPhotoName
     print "License:", ScanPlate.getLikelyLicense( newPhotoName )
     print "GeoTag:", GetLatLon.getLatLon( newPhotoName )
+    
+#    if (redisByChecksum.get(unpickled[1] == None):
+#	redisByChecksum.append(
     os.remove(newPhotoName)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(
