@@ -41,26 +41,24 @@ def photoInfo(pickled):
     print "GeoTag:", geotags
 
     if (len(licenses) > 0):
-	redisAdd    
+        redisAdd(licenses, geotags, oldName, digest)
+    
+    os.remove(newPhotoName)
 
-def redisAdd(plate, geotag, photoName, md5):
-    # Found a license plate at this point.
-    # Remove preceeding '/tmp/'
+def redisAdd(licenses, geotags, photoName, md5):
     cleanName = re.sub('\/tmp\/', '', photoName)
-    #
-    ## Consider locking the db
-    #
+    
     if redisByChecksum.llen(md5) == 0:
         print 'Inserting', md5, 'into redisByChecksum and redisMD5ByLicense'
-        for p in plate:
-            redisByChecksum.lpush(md5, p[0])
-            redisMD5ByLicense.lpush(p[0], md5)
+        for l in licenses:
+            redisByChecksum.lpush(md5, l[0])
+            redisMD5ByLicense.lpush(l[0], md5)
 
     if redisByName.llen(cleanName) == 0:
         print 'Inserting', cleanName, 'into redisByName and redisNameByLicense'
-        for p in plate:
-            redisByName.lpush(cleanName, p[0])
-            redisNameByLicense.lpush(p[0], cleanName)
+        for l in licenses:
+            redisByName.lpush(cleanName, l[0])
+            redisNameByLicense.lpush(l[0], cleanName)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(
         host=hostname))
