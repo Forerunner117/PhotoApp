@@ -1,4 +1,4 @@
-import sys,os
+import sys,os,re
 import pickle
 import ScanPlate
 import GetLatLon
@@ -41,9 +41,7 @@ def photoInfo(pickled):
     print "GeoTag:", geotags
 
     if (len(licenses) > 0):
-	redisAdd(licenses, geotags, oldName, digest)
-
-    os.remove(newPhotoName)    
+	redisAdd    
 
 def redisAdd(plate, geotag, photoName, md5):
     # Found a license plate at this point.

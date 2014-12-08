@@ -5,6 +5,7 @@ import pickle
 import PIL
 import pika
 import hashlib
+import redis
 
 hostname= os.environ['RABBIT_HOST'] \
           if 'RABBIT_HOST' in os.environ else 'rabbitmq-server.local'
@@ -16,6 +17,11 @@ app = Flask(__name__)
 
 UPLOAD_FOLDER = '/tmp'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
+redisByChecksum = redis.Redis(host='redis-server.local', db=1)
+redisByName = redis.Redis(host='redis-server.local', db=2)
+redisMD5ByLicense = redis.Redis(host='redis-server.local', db=3)
+redisNameByLicense = redis.Redis(host='redis-server.local', db=4)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -61,6 +67,50 @@ def scan():
             return '{"digest":"%s"}' % (digest)
         else:
             abort(403)
+
+@app.route("/licenses-by-md5/<checksum>")
+def licenses_by_md5(checksum):
+    itemCount = redisByChecksum.llen(checksum)
+    if itemCount > 0:
+        # Extract the items
+        value = [redisByChecksum.lindex(checksum, index) for index in range(itemCount)]
+        # Comma seperated list
+        cmlist = ",".join(value)
+        return "{ 'Present' : '%s' }" % cmlist
+    else:
+        return "{ 'Present' : '%s' }" % ('false')
+
+@app.route("/licenses-by-name/<filename>")
+def licenses_by_name(filename):
+    itemCount = redisByName.llen(filename)
+    if itemCount > 0:
+        # Extract the items
+        value = [redisByName.llen(filename, index) for index in range(itemCount)]
+        cmlist = ",".join(value)
+        return "{ 'Present' : '%s' }" % cmlist
+    else:
+        return "{ 'Present' : '%s' }" % ('false')
+
+@app.route("/name-by-license/<license>")
+def name_by_license(license):
+    itemCount = redisNameByLicense.llen(license)
+    if itemCount > 0:
+        value = [redisNameByLicense(license, index) for index in range(itemCount)]
+        cmlist = ",".join(value)
+        return "{ 'Present' : '%s' }" % cmlist
+    else:
+        return "{ 'Present' : '%s' }" % ('false')
+
+@app.route("/md5-by-license/<license>")
+def md5_by_license(license):
+    itemCount = redisMD5ByLicense.llen(license)
+    if itemCount > 0:
+        value = [redisMD5ByLicense(license, index) for index in range(itemCount)]
+        cmlist = ",".join(value)
+        return "{ 'Present' : '%s' }" % cmlist
+    else:
+        return "{ 'Present' : '%s' }" % ('false')
+
 
 if __name__ == "__main__":
     app.debug = True
