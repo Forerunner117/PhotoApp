@@ -82,7 +82,7 @@ def licenses_by_md5(checksum):
 def licenses_by_name(filename):
     itemCount = redisByName.llen(filename)
     if itemCount > 0:
-        val = [redisByName.llen(filename, index) for index in range(itemCount)]
+        val = [redisByName.lindex(filename, index) for index in range(itemCount)]
         valList = ",".join(val)
         return "Results : { '%s' }" % valList
     else:
@@ -92,7 +92,7 @@ def licenses_by_name(filename):
 def name_by_license(license):
     itemCount = redisNameByLicense.llen(license)
     if itemCount > 0:
-        val = [redisNameByLicense(license, index) for index in range(itemCount)]
+        val = [redisNameByLicense.lindex(license, index) for index in range(itemCount)]
         valList = ",".join(val)
         return "Results : { '%s' }" % valList
     else:
@@ -102,7 +102,7 @@ def name_by_license(license):
 def md5_by_license(license):
     itemCount = redisMD5ByLicense.llen(license)
     if itemCount > 0:
-        val = [redisMD5ByLicense(license, index) for index in range(itemCount)]
+        val = [redisMD5ByLicense.lindex(license, index) for index in range(itemCount)]
         valList = ",".join(val)
         return "Results : { '%s' }" % valList
     else:

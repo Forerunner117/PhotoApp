@@ -46,19 +46,17 @@ def photoInfo(pickled):
     os.remove(newPhotoName)
 
 def redisAdd(licenses, geotags, photoName, md5):
-    cleanName = re.sub('\/tmp\/', '', photoName)
-    
     if redisByChecksum.llen(md5) == 0:
         print 'Inserting', md5, 'into redisByChecksum and redisMD5ByLicense'
         for l in licenses:
             redisByChecksum.lpush(md5, l[0])
             redisMD5ByLicense.lpush(l[0], md5)
 
-    if redisByName.llen(cleanName) == 0:
-        print 'Inserting', cleanName, 'into redisByName and redisNameByLicense'
+    if redisByName.llen(photoName) == 0:
+        print 'Inserting', photoName, 'into redisByName and redisNameByLicense'
         for l in licenses:
-            redisByName.lpush(cleanName, l[0])
-            redisNameByLicense.lpush(l[0], cleanName)
+            redisByName.lpush(photoName, l[0])
+            redisNameByLicense.lpush(l[0], photoName)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(
         host=hostname))
