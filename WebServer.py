@@ -72,24 +72,21 @@ def scan():
 def licenses_by_md5(checksum):
     itemCount = redisByChecksum.llen(checksum)
     if itemCount > 0:
-        # Extract the items
         value = [redisByChecksum.lindex(checksum, index) for index in range(itemCount)]
-        # Comma seperated list
         cmlist = ",".join(value)
-        return "{ 'Present' : '%s' }" % cmlist
+        return "Results : { '%s' }" % cmlist
     else:
-        return "{ 'Present' : '%s' }" % ('false')
+        return "No Results"
 
 @app.route("/licenses-by-name/<filename>")
 def licenses_by_name(filename):
     itemCount = redisByName.llen(filename)
     if itemCount > 0:
-        # Extract the items
         value = [redisByName.llen(filename, index) for index in range(itemCount)]
         cmlist = ",".join(value)
-        return "{ 'Present' : '%s' }" % cmlist
+        return "Results : { '%s' }" % cmlist
     else:
-        return "{ 'Present' : '%s' }" % ('false')
+        return "No Results"
 
 @app.route("/name-by-license/<license>")
 def name_by_license(license):
@@ -97,9 +94,9 @@ def name_by_license(license):
     if itemCount > 0:
         value = [redisNameByLicense(license, index) for index in range(itemCount)]
         cmlist = ",".join(value)
-        return "{ 'Present' : '%s' }" % cmlist
+        return "Results : { '%s' }" % cmlist
     else:
-        return "{ 'Present' : '%s' }" % ('false')
+        return "No Results"
 
 @app.route("/md5-by-license/<license>")
 def md5_by_license(license):
@@ -107,9 +104,9 @@ def md5_by_license(license):
     if itemCount > 0:
         value = [redisMD5ByLicense(license, index) for index in range(itemCount)]
         cmlist = ",".join(value)
-        return "{ 'Present' : '%s' }" % cmlist
+        return "Results : { '%s' }" % cmlist
     else:
-        return "{ 'Present' : '%s' }" % ('false')
+        return "No Results"
 
 
 if __name__ == "__main__":
